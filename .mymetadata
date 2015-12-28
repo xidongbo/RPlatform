@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-module
+  type="WEB"
+  name="RPlatform"
+  id="myeclipse.1449909912911"
+  context-root="/RPlatform"
+  j2ee-spec="5.0"
+  archive="RPlatform.war">
+  <attributes>
+    <attribute name="webrootdir" value="WebRoot" />
+  </attributes>
+</project-module>
+
