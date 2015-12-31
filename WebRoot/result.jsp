@@ -5,6 +5,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 %>
 <%@ page import="com.RPlatform.*" %>
 <%@ page import="java.sql.*" %>
+<%@ page import="java.io.File" %>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
   <head>
@@ -41,6 +42,16 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
         SQLHelp.update(sql);
         sql="drop table `"+request.getParameter("delete")+"`";
         SQLHelp.update(sql);
+      
+         File excel=new File("D:\\upload\\"+request.getParameter("delete")+".xls");
+         if(excel.exists())
+           excel.delete();//删除结果表
+         File pic1=new File("D:\\upload\\"+request.getParameter("delete")+"_pic1.jpg");
+         if(pic1.exists())
+          pic1.delete();//删除图片1
+         File pic2=new File("D:\\upload\\"+request.getParameter("delete")+"_pic2.jpg");
+          if(pic2.exists())
+           pic2.delete();//删除图片2
      }
       %>
    
@@ -196,8 +207,8 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
                              image_path1=st.getString("pic_path1");
                               image_path2=st.getString("pic_path2");
                           }
-                          else if(algorithm.equals("2"))//k_means
-                              image_path1=st.getString("pic_path1");
+                          else //k_means，linear_regression，bayes
+                            image_path1=st.getString("pic_path1");
                        }
                        else
                        {%>
@@ -222,7 +233,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
                              image_path1=st.getString("pic_path1");
                               image_path2=st.getString("pic_path2");
                           }
-                          else if(algorithm.equals("2"))//k_means
+                          else //k_means，linear_regression，bayes
                               image_path1=st.getString("pic_path1");
                            
                         
@@ -312,38 +323,62 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
        String image2=null;
        if(image_path1!=null)
        {
-         image1=image_path1.split("\\\\")[2];
-        image1="/images/"+image1;
-        if(image_path2!=null)
-        {
-           image2=image_path2.split("\\\\")[2];
-           image2="/images/"+image2;
-        } 
-        if(algorithm.equals("2"))
-         {//k_means
-      %>
-            <div class="panel panel-default">
-                <p class="panel-heading">聚类结果</p>
-                <div class="panel-body gallery">
-                    <img src="<%=image1%>"   class="img-polaroid">
-                    <div class="clearfix"></div>
-                </div>
-            </div>
-
-       <%}
-       else if(algorithm.equals("4"))
-       {//PCA
-      %>
-            <div class="panel panel-default">
-                <p class="panel-heading">碎石图及降维后点的分布图</p>
-                <div class="panel-body gallery">
-                    <img src="<%=image1%>"   class="img-polaroid">
-                    <img src="<%=image2%>"   class="img-polaroid">
-                    <div class="clearfix"></div>
-                </div>
-            </div>
-
-       <%}
+	         image1=image_path1.split("\\\\")[2];
+	        image1="/images/"+image1;
+	        if(image_path2!=null)
+	        {
+	           image2=image_path2.split("\\\\")[2];
+	           image2="/images/"+image2;
+	        } 
+	        if(algorithm.equals("2"))
+	         {//k_means
+	      %>
+	            <div class="panel panel-default">
+	                <p class="panel-heading">聚类结果</p>
+	                <div class="panel-body gallery">
+	                    <img src="<%=image1%>"   class="img-polaroid">
+	                    <div class="clearfix"></div>
+	                </div>
+	            </div>
+	
+	       <%}
+	       else if(algorithm.equals("4"))
+	       {//PCA
+	      %>
+	            <div class="panel panel-default">
+	                <p class="panel-heading">碎石图及降维后点的分布图</p>
+	                <div class="panel-body gallery">
+	                    <img src="<%=image1%>"   class="img-polaroid">
+	                    <img src="<%=image2%>"   class="img-polaroid">
+	                    <div class="clearfix"></div>
+	                </div>
+	            </div>
+	
+	       <%}
+	         else if(algorithm.equals("1"))
+	       {//linear_regression
+	      %>
+	            <div class="panel panel-default">
+	                <p class="panel-heading">残差与杠杆图</p>
+	                <div class="panel-body gallery">
+	                    <img src="<%=image1%>"   class="img-polaroid">
+	                    <div class="clearfix"></div>
+	                </div>
+	            </div>
+	
+	       <%}
+	        else if(algorithm.equals("3"))
+	       {//bayes
+	      %>
+	            <div class="panel panel-default">
+	                <p class="panel-heading">贝叶斯结果图</p>
+	                <div class="panel-body gallery">
+	                    <img src="<%=image1%>"   class="img-polaroid">
+	                    <div class="clearfix"></div>
+	                </div>
+	            </div>
+	
+	       <%}
        }%>
             <footer>
 

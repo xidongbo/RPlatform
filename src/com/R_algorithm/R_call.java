@@ -87,11 +87,9 @@ public class R_call {
         	   return null;
 	}
 	
-	public String NaiveBayes(String [][] data_str,String [] predict_str)
+	public Map<String,Object> NaiveBayes(String [][] data_str,String [] predict_str) throws IOException
 	{
-		this.re=new Rengine(null,false,null);
-		boolean isload=re.waitForR();
-		if(isload==true)System.out.println("R is ready");
+		Map<String,Object> map =new HashMap<String,Object>();
 		re.eval("library(e1071)");
 		Vector<String> data_vec=new Vector<String>();
 		int row=data_str.length;
@@ -130,6 +128,13 @@ public class R_call {
 		}
 		REXP data_rex=re.eval(" dataset=data.frame(" + type_str + ")" );
 		//System.out.println(" dataset=data.frame(" + type_str + ")");
+		
+		   String yin="\"";
+		   String code="jpeg(file="+yin+"naiveBayes.jpeg"+yin+")";	    
+	        re.eval(code);
+	        re.eval("plot(dataset)");	       
+	        re.eval("dev.off()");
+		
 	    REXP crex=re.eval("classifier<-naiveBayes(dataset[,1:"+ Integer.toString(colum-1) +"],dataset[,"+Integer.toString(colum)+"])");  
 		//System.out.println("classifier<-naiveBayes(dataset[,1:"+ Integer.toString(colum-1) +"],dataset[,"+Integer.toString(colum)+"])");
 		
@@ -146,23 +151,30 @@ public class R_call {
 		}
 		
 		
+		
+		
 	    re.eval(" new_data=data.frame("+newdata_str+")");
-	   // System.out.println(" new_data=data.frame("+newdata_str+")");
+	    System.out.println(" new_data=data.frame("+newdata_str+")");
 		REXP RE=re.eval(" predict(classifier, new_data)" );
-	//	 System.out.println(" predict(classifier, new_data)");
-		re.end();
+		 System.out.println(" predict(classifier, new_data)");
+		//re.end();
 		RFactor rf= RE.asFactor();
 		//System.out.println(rf.toString());
 		String result=rf.at(0);
-		//System.out.println(result);
-		 return result;
-		//System.out.println(p[0]);
+		map.put("result", result);
+
+	    BufferedImage image=ImageIO.read(new File("naiveBayes.jpeg"));
+		  map.put("image", image);
+		
+		//System.out.println(resul);
+		 return map;
 		
 	}
 	
-	public double[] linearRegression(double[][] data,double[] predict_data)
+	public Map<String,Object> linearRegression(double[][] data,double[] predict_data) throws IOException
 	{
 		
+		Map<String,Object>map=new HashMap<String,Object>();
 		int row=data.length;
 		int colum=data[0].length;
 		Vector<String> data_vec=new Vector<String>();
@@ -185,7 +197,7 @@ public class R_call {
 		for(int i=0;i<colum;i++)
 		{
 			re.eval(type.get(i)+"=c("+data_vec.get(i)+")");
-			//System.out.println(type.get(i)+"=c("+data_vec.get(i)+")");
+		//	System.out.println(type.get(i)+"=c("+data_vec.get(i)+")");
 			
 			
 		}
@@ -197,7 +209,7 @@ public class R_call {
 		}
 		re.eval("dataset=data.frmae("+dataset_str+")");
 	//	System.out.println("dataset=data.frame("+dataset_str+")");
-		
+	
 		
 	          
 		String lm_str="";
@@ -212,13 +224,13 @@ public class R_call {
 			}
 		}
 	   re.eval("mod=lm("+lm_str+")");
-	  // System.out.println("mod=lm("+lm_str+")");
+	 //  System.out.println("mod=lm("+lm_str+")");
 	   
 	   String yin="\"";
-		
-       String code="jpeg(file="+yin+"linearplot.jpeg"+yin+")";
+	   String code="jpeg(file="+yin+"linear.jpeg"+yin+")";
+    
        String code2="jpeg(file="+yin+"linearplot2.jpeg"+yin+")";
-    //   System.out.println(code);
+     //  System.out.println(code);
         re.eval(code);
         re.eval("plot(mod)");	       
         re.eval("dev.off()");
@@ -238,9 +250,13 @@ public class R_call {
    //System.out.println(RE.toString());
 	
 	double []result=RE.asDoubleArray();
-	 return result;
+	map.put("result", result);
 	
-   
+    BufferedImage image=ImageIO.read(new File("linear.jpeg"));
+	  map.put("image", image);
+	  
+	return  map;
+	
 	}
 	
 	public  Map<String,Object> PCA(double[][] data,int k) throws InterruptedException, IOException

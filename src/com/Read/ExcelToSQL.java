@@ -1,5 +1,6 @@
 package com.Read;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -131,6 +132,10 @@ public class ExcelToSQL
 	    		
 	    	  }
 	      }
+    	  File file=new File(path + "\\" + filename);
+    	  if(file.exists())
+    	   file.delete();//保存到数据库，删除文件
+    	  
 	 }
 	 
 	 

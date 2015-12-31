@@ -54,7 +54,7 @@ public class R_algorithm extends HttpServlet{
 	        	 return;
 		    }
 		    
-		     if(index.equals("1"))//多元线性回归
+		     if(index.equals("1"))//linear_regression
 		     {	
 		    	 
 		    	 try {
@@ -100,7 +100,9 @@ public class R_algorithm extends HttpServlet{
 			        	 j++;
 			         }
 			         st.close();
-			         double[] result=re.linearRegression(data,predict_data);
+			         Map<String,Object>returnmap=re.linearRegression(data,predict_data);
+			         double[] result=(double[])returnmap.get("result");
+			         BufferedImage image=(BufferedImage)returnmap.get("image");
 			        
 			     	 
 			     	  Calendar cal=Calendar.getInstance();    
@@ -112,11 +114,15 @@ public class R_algorithm extends HttpServlet{
 			    	  int second=cal.get(Calendar.SECOND);
 			    	  String time = year+ "_" + (month+1) + "_" + day + "_" + hour + "_" + minute + "_" + second;
 			     	
-			     	 String result_table=username+"_"+time+"多元线性回归_result";
+			     	 String result_table=username+"_"+time+"linear_regression_result";
 			     	
+			     	 String pic_path="D:\\\\upload\\\\";
+			     	 pic_path+=result_table+"_pic1.jpg";
+			     	 ImageIO.write(image,"JPG",new File(pic_path));//写到磁盘
+			     	 
 			     	
 			     	 //插入分析记录
-			     	 String sql_record="insert into analysis_record(username,algorithm,input_table,output_table) values('"+username+"','1','"+table+"','"+result_table+"')";
+			     	 String sql_record="insert into analysis_record(username,algorithm,input_table,output_table,pic_path1) values('"+username+"','1','"+table+"','"+result_table+"','"+pic_path+"')";
 			     	
 			     	 
 			     	//插入分析结果
@@ -137,7 +143,7 @@ public class R_algorithm extends HttpServlet{
 			     	response.sendRedirect("/RPlatform/result.jsp");
 					 } catch (SQLException e1) {
 							// TODO Auto-generated catch block
-							e1.printStackTrace();
+						 out.print("<script>alert('测试数据有误！');history.back();</script>");
 					}catch(NumberFormatException e){
 			    		 out.print("<script>alert('算法参数有误！');history.back();</script>");
 			    		 return;
@@ -198,7 +204,7 @@ public class R_algorithm extends HttpServlet{
 			     	 String result_table=username+"_"+time+"K_means_result";
 			     	
 			     	 String pic_path="D:\\\\upload\\\\";
-			     	 pic_path+=result_table+"_pic.jpg";
+			     	 pic_path+=result_table+"_pic1.jpg";
 			     	 ImageIO.write(image,"JPG",new File(pic_path));//写到磁盘
 			     	
 			     	 //插入分析记录
@@ -206,7 +212,7 @@ public class R_algorithm extends HttpServlet{
 			     	 SQLHelp.update(sql); 
 			     	 
 			     	//插入分析结果
-			     	 sql="create table `"+result_table+"` (`第i组测试数据` int(13) not null,`聚类结果` int(13) not null,`聚类中心` varchar(100) not null)";
+			     	 sql="create table `"+result_table+"` (`第i组测试数据` int(13) not null,`聚类结果` int(13) not null,`聚类中心` varchar(300) not null)";
 			     	 SQLHelp.update(sql);//建结果表
 			     	 sql="insert into `"+result_table+"` (`第i组测试数据`,`聚类结果`,`聚类中心`) values";
 			     	 for(int i=1;i<cluster.length;i++)
@@ -239,7 +245,7 @@ public class R_algorithm extends HttpServlet{
 		         }
 				 } catch (SQLException e1) {
 						// TODO Auto-generated catch block
-						e1.printStackTrace();
+					 out.print("<script>alert('测试数据有误！');history.back();</script>");
 				}catch(NumberFormatException e){
 		    		 out.print("<script>alert('算法参数有误！');history.back();</script>");
 		    		 return;
@@ -250,7 +256,95 @@ public class R_algorithm extends HttpServlet{
 		     }
 		     if(index.equals("3"))//NaiveBayes
 		     {
-		    	
+		    	 try {
+			         String predict_data_str=request.getParameter("predict_data");//算法参数
+			         if(predict_data_str==null)
+			         {
+			        	 out.print("<script>alert('算法参数有误！');history.back();</script>");
+			        	 return;
+			         }
+			         String[] predict_data=predict_data_str.split(",");
+			       
+			         String username=(String)request.getSession().getAttribute("username");
+			         String sql="select * from analysis_data where username='"+username+"'";
+				     ResultSet st=SQLHelp.query(sql);//得到该用户所有测试数据
+				     st.absolute(table_index);//定位到行
+				     String table=st.getString("input_table");//得到测试数据表名
+				     sql="select * from `"+table+"`";
+				     st=SQLHelp.query(sql);//得到测试数据
+		             st.last();
+					 int row = st.getRow(); 
+					 st.beforeFirst();
+					 int col=st.getMetaData().getColumnCount();
+					 if(predict_data.length!=col-1)
+			         {//不是N-1维数据
+			        	 out.print("<script>alert('算法参数维数有误！');history.back();</script>");
+			        	 return;
+			         }		 
+					 
+					 String[][] data=new String[row][col];
+					 int j=0;
+			         while(st.next())
+			         { 
+			        	 for(int i=0;i<col;i++)
+			        	 {
+			        		 data[j][i]=st.getString(i+1);
+			        	 }
+			        	 j++;
+			         }
+			         st.close();
+			         Map<String,Object>returnmap=re.NaiveBayes(data,predict_data);
+			         String result=(String)returnmap.get("result");
+			         BufferedImage image=(BufferedImage)returnmap.get("image");
+			        
+			     	 
+			     	  Calendar cal=Calendar.getInstance();    
+			    	  int year=cal.get(Calendar.YEAR);    
+			    	  int month=cal.get(Calendar.MONTH);    
+			    	  int day=cal.get(Calendar.DATE);    
+			    	  int hour=cal.get(Calendar.HOUR_OF_DAY);    
+			    	  int minute=cal.get(Calendar.MINUTE);    
+			    	  int second=cal.get(Calendar.SECOND);
+			    	  String time = year+ "_" + (month+1) + "_" + day + "_" + hour + "_" + minute + "_" + second;
+			     	
+			     	 String result_table=username+"_"+time+"NaiveBayes_result";
+			     	
+			     	 String pic_path="D:\\\\upload\\\\";
+			     	 pic_path+=result_table+"_pic1.jpg";
+			     	 ImageIO.write(image,"JPG",new File(pic_path));//写到磁盘
+			     	 
+			     	
+			     	 //插入分析记录
+			     	 String sql_record="insert into analysis_record(username,algorithm,input_table,output_table,pic_path1) values('"+username+"','3','"+table+"','"+result_table+"','"+pic_path+"')";
+			     	
+			     	 
+			     	//插入分析结果
+			     	 String sql_result_table="create table `"+result_table+"` (`预测结果` varchar(20) not null)";
+			     	 
+			     	 
+			     	 
+			     	sql="insert into `"+result_table+"` values('"+result+"')";
+			     	
+			         SQLHelp.update(sql_record);  //插入分析记录
+			     	 SQLHelp.update(sql_result_table);//建结果表
+			     	 SQLHelp.update(sql);//结果表插入数据
+			     	 
+			   
+			     	 sql="select * into outfile 'D:/upload/"+result_table+".xls' from `"+result_table+"`";
+			     	SQLHelp.query(sql);//结果表写入excel
+			     	 
+			     	response.sendRedirect("/RPlatform/result.jsp");
+					 } catch (SQLException e1) {
+							// TODO Auto-generated catch block
+						 out.print("<script>alert('测试数据有误！');history.back();</script>");
+					}catch(NumberFormatException e){
+			    		 out.print("<script>alert('算法参数有误！');history.back();</script>");
+			    		 return;
+					}catch(ArrayIndexOutOfBoundsException e)
+					{
+						 out.print("<script>alert('算法参数有误！');history.back();</script>");
+						 return;
+					}
 		    	 return;
 		     }
 		     if(index.equals("4"))//PCA
@@ -340,7 +434,7 @@ public class R_algorithm extends HttpServlet{
 			     	response.sendRedirect("/RPlatform/result.jsp");
 					 } catch (SQLException e1) {
 							// TODO Auto-generated catch block
-							e1.printStackTrace();
+						 out.print("<script>alert('测试数据有误！');history.back();</script>");
 					}catch(NumberFormatException e){
 			    		 out.print("<script>alert('算法参数有误！');history.back();</script>");
 			    		 return;

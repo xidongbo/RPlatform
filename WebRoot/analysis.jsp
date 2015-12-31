@@ -177,7 +177,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 			      {
 			         %>
 			         <select name="algorithm" id="algorithm" class="form-control" onchange="analysis_submit()">
-                    <option value="1" ${param.algorithm eq  '1' ? 'selected="selected"':''}>多元线性回归</option>
+                    <option value="1" ${param.algorithm eq  '1' ? 'selected="selected"':''}>linear_regression</option>
                     <option value="2" ${param.algorithm eq  '2' ? 'selected="selected"':''}">K_means</option>
                     <option value="3" ${param.algorithm eq  '3' ? 'selected="selected"':''}">NaiveBayes</option>                 
                     <option value="4" ${param.algorithm eq  '4' ? 'selected="selected"':''}">PCA</option>           
@@ -188,7 +188,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 			      {
 			       %>
 			        <select name="algorithm" id="algorithm" class="form-control">
-                    <option selected="selected" value="1">多元线性回归</option>
+                    <option selected="selected" value="1">linear_regression</option>
                     <option value="2">K_means</option>
                     <option value="3">NaiveBayes</option>                 
                     <option value="4">PCA</option>           
@@ -263,7 +263,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 			      if((String)request.getParameter("algorithm")!=null)
 			      {
 				      if(((String)request.getParameter("algorithm")).equals("1"))
-				      {//多元线性回归
+				      {//linear_regression
 				          %>
 				          <ul class="set nav nav-list collapse">    
 				          <br/> 
@@ -290,8 +290,10 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 				     {//NaiveBayes
 					     %>
 					      <ul class="set nav nav-list collapse">    
-					       
-					          <br/> 
+					        <br/> 
+				           <label>要预测的数据（数据之间请用英文逗号隔开）</label>
+				         <input type="text" name="predict_data" class="form-control" style="width:400px"/>
+				          <br/> 
 					         <input type="button" class="btn btn-default" value="开始" onclick="R_submit()"/>             
 					      </ul>   
 					     <%
