@@ -52,11 +52,13 @@ public class SQLHelp{
 		 
 	private static Connection getConnection() throws SQLException, ClassNotFoundException{
     	Class.forName("com.mysql.jdbc.Driver");	// 加载数据库驱动，注册到驱动管理器
+    	
     	return DriverManager.getConnection(url, username,password);
     	   }
     
     public static int update(String sql)
 	{//增、删、改，返回更新的行数，返回0则失败
+    	
     	int i=0;
     	Connection conn=null;
     	Statement st=null;
@@ -82,6 +84,7 @@ public class SQLHelp{
        	ResultSet rs=null;
    		try {
    			st=getConnection().createStatement();
+   		
    			rs=st.executeQuery(sql);
    		} catch (SQLException e) {
    			// TODO Auto-generated catch block

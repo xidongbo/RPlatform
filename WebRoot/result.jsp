@@ -30,11 +30,16 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 <body class=" theme-blue">
      <%
      String sql=null;
-     if(request.getAttribute("delete")!=null)
+     if(session.getAttribute("username")==null)
      {
-        sql="delete analysis_record where output_table='"+request.getAttribute("delete")+"'";
+        response.sendRedirect("index.jsp");
+        return;
+     }
+     if(request.getParameter("delete")!=null)
+     {
+        sql="delete from analysis_record where output_table='"+request.getParameter("delete")+"'";
         SQLHelp.update(sql);
-        sql="drop table '"+request.getAttribute("delete")+"'";
+        sql="drop table `"+request.getParameter("delete")+"`";
         SQLHelp.update(sql);
      }
       %>
@@ -139,6 +144,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
             <li><a href="#" data-target=".legal-menu" class="nav-header collapsed" data-toggle="collapse"><i class="fa fa-fw fa-legal"></i> 法律信息<i class="fa fa-collapse"></i></a></li>
             <li><ul class="legal-menu nav nav-list collapse">
                 <li ><a href="privacy.jsp"><span class="fa fa-caret-right"></span> 隐私政策</a></li>
+                 <li ><a href="team-info.jsp"><span class="fa fa-caret-right"></span> 南航1613001班一队介绍</a></li>
                 <li ><a href="terms.jsp"><span class="fa fa-caret-right"></span> 南航1613001班一队条款</a></li>
             </ul></li>
 
@@ -161,7 +167,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
         </div>
         <div class="main-content">
 
-          <form id="form1" name="form1" action="reuslt.jsp">
+          <form id="form1" name="form1" action="result.jsp">
             <div class="form-group">
                 <label>历史记录</label>
                 <select name="history_record" id="history_record" class="form-control" onchange="document.form1.submit();">
@@ -169,6 +175,9 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
                    sql="select * from analysis_record where username='"+(String)request.getSession().getAttribute("username")+"'";
                    ResultSet st=SQLHelp.query(sql);
                    String output_table=null;
+                   String image_path1=null;
+                   String image_path2=null;
+                   String algorithm=null;
                    int i=1;
                   if((String)request.getParameter("history_record")!=null)
                   {//显示选中的
@@ -180,6 +189,15 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
                         <option value="<%=i%>" selected="selected"><%=st.getString("output_table")%></option>    
                        <%
                          output_table=st.getString("output_table");
+                         algorithm=st.getString("algorithm");
+                         
+                         if(algorithm.equals("4"))
+                         {//pca
+                             image_path1=st.getString("pic_path1");
+                              image_path2=st.getString("pic_path2");
+                          }
+                          else if(algorithm.equals("2"))//k_means
+                              image_path1=st.getString("pic_path1");
                        }
                        else
                        {%>
@@ -197,6 +215,17 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
                         <option value="<%=i%>" selected="selected"><%=st.getString("output_table")%></option>    
                       <%
                          output_table=st.getString("output_table");
+                         algorithm=st.getString("algorithm");
+                         
+                         if(algorithm.equals("4"))
+                         {//pca
+                             image_path1=st.getString("pic_path1");
+                              image_path2=st.getString("pic_path2");
+                          }
+                          else if(algorithm.equals("2"))//k_means
+                              image_path1=st.getString("pic_path1");
+                           
+                        
                       }
                       else
                       {
@@ -213,9 +242,10 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
           </form>
 <div class="btn-toolbar list-toolbar">
 
-
-    <button class="btn btn-default">数据结果导出</button>
-    <button class="btn btn-default">图片结果导出</button>
+  <%if(output_table!=null)
+  {%>
+    <a href="/images/<%=output_table%>.xls"><button class="btn btn-default">数据结果导出</button></a>
+    <%} %>
   <div class="btn-group">
   </div>
 </div>
@@ -223,7 +253,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
        <%if(output_table!=null)
        {%>
          <label>部分分析结果:</label>
-         <input type="button" class="btn btn-primary pull-right" value="删除分析结果" onclick="document.location.herf='result.jsp?delete='<%=output_table%>"/>
+         <input type="button" class="btn btn-primary pull-right" value="删除分析结果" onclick="document.location.href='result.jsp?delete=<%=output_table%>'"/>
           <table class="table">
                 <thead>
                 <% 
@@ -276,21 +306,51 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
        <%}
         %>
 
+
+       <%
+       String image1=null;
+       String image2=null;
+       if(image_path1!=null)
+       {
+         image1=image_path1.split("\\\\")[2];
+        image1="/images/"+image1;
+        if(image_path2!=null)
+        {
+           image2=image_path2.split("\\\\")[2];
+           image2="/images/"+image2;
+        } 
+        if(algorithm.equals("2"))
+         {//k_means
+      %>
             <div class="panel panel-default">
-                <p class="panel-heading">图片结果</p>
+                <p class="panel-heading">聚类结果</p>
                 <div class="panel-body gallery">
-                    <img src="images/regre.jpg" class="img-polaroid">
+                    <img src="<%=image1%>"   class="img-polaroid">
                     <div class="clearfix"></div>
                 </div>
             </div>
 
+       <%}
+       else if(algorithm.equals("4"))
+       {//PCA
+      %>
+            <div class="panel panel-default">
+                <p class="panel-heading">碎石图及降维后点的分布图</p>
+                <div class="panel-body gallery">
+                    <img src="<%=image1%>"   class="img-polaroid">
+                    <img src="<%=image2%>"   class="img-polaroid">
+                    <div class="clearfix"></div>
+                </div>
+            </div>
 
+       <%}
+       }%>
             <footer>
 
                 <hr>
                 <!-- Purchase a site license to remove this link from the footer: http://www.portnine.com/bootstrap-themes -->
-                <p class="pull-right"> <a  target="_blank">RPlato</a> 由 <a href="team-info.html" target="_blank">南航1613001班一队</a>设计</p>
-                <p>© 2015 <a href="team-info.html" target="_blank">南航1613001班一队</a></p>
+                <p class="pull-right"> <a  target="_blank">RPlato</a> 由 <a href="team-info.jsp" target="_blank">南航1613001班一队</a>设计</p>
+                <p>© 2015 <a href="team-info.jsp" target="_blank">南航1613001班一队</a></p>
             </footer>
 
     </div>

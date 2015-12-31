@@ -10,6 +10,7 @@ DROP TABLE IF EXISTS `analysis_record`;
 create table `analysis_record`(
      `id` int(13) auto_increment  not null primary key,
      `username` varchar(20)not null,
+     `algorithm` int(5)not null,
      `input_table` varchar(100)not null,
      `output_table` varchar(100)not null,
      `pic_path1` varchar(100)null,

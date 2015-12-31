@@ -130,6 +130,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
             <li><a href="#" data-target=".legal-menu" class="nav-header collapsed" data-toggle="collapse"><i class="fa fa-fw fa-legal"></i> 法律信息<i class="fa fa-collapse"></i></a></li>
             <li><ul class="legal-menu nav nav-list collapse">
                 <li ><a href="privacy.jsp"><span class="fa fa-caret-right"></span> 隐私政策</a></li>
+                 <li ><a href="team-info.jsp"><span class="fa fa-caret-right"></span> 南航1613001班一队介绍</a></li>
                 <li ><a href="terms.jsp"><span class="fa fa-caret-right"></span> 南航1613001班一队条款</a></li>
             </ul></li>
 
@@ -177,8 +178,8 @@ Please see our <a href="privacy.jsp">Privacy Policy</a> as set forth on the site
                 <hr>
 
                 <!-- Purchase a site license to remove this link from the footer: http://www.portnine.com/bootstrap-themes -->
-                <p class="pull-right"> <a  target="_blank">RPlato</a> 由 <a href="team-info.html" target="_blank">南航1613001班一队</a>设计</p>
-                <p>© 2015 <a href="team-info.html" target="_blank">南航1613001班一队</a></p>
+                <p class="pull-right"> <a  target="_blank">RPlato</a> 由 <a href="team-info.jsp" target="_blank">南航1613001班一队</a>设计</p>
+                <p>© 2015 <a href="team-info.jsp" target="_blank">南航1613001班一队</a></p>
             </footer>
         </div>
     </div>

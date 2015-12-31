@@ -1,4 +1,4 @@
-<%@ page language="java" import="java.util.*" pageEncoding="utf-8"%>
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8" %>
 <%
 String path = request.getContextPath();
 String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
@@ -28,18 +28,25 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 
 </head>
 <body class=" theme-blue">
-     <%
+<% 
+     request.setCharacterEncoding("UTF-8");
      String sql=null;
-     if(request.getAttribute("delete")!=null)
+     if(session.getAttribute("username")==null)
      {
-        sql="delete analysis_data where input_table='"+request.getAttribute("delete")+"'";
+        response.sendRedirect("index.jsp");
+        return;
+     }
+     if(request.getParameter("delete")!=null)
+     {
+        String input=new String(((String)request.getParameter("delete")).getBytes("ISO-8859-1"),"UTF-8");
+        sql="delete from analysis_data where input_table='"+input+"'";
         SQLHelp.update(sql);
-        sql="drop table '"+request.getAttribute("delete")+"'";
+        sql="drop table `"+input+"`";
         SQLHelp.update(sql);
      }
-      %>
+%>
   
-
+  
     <script type="text/javascript">
         $(function() {
             var match = document.cookie.match(new RegExp('color=([^;]+)'));
@@ -140,6 +147,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
             <li><a href="#" data-target=".legal-menu" class="nav-header collapsed" data-toggle="collapse"><i class="fa fa-fw fa-legal"></i> 法律信息<i class="fa fa-collapse"></i></a></li>
             <li><ul class="legal-menu nav nav-list collapse">
                 <li ><a href="privacy.jsp"><span class="fa fa-caret-right"></span> 隐私政策</a></li>
+                <li ><a href="team-info.jsp"><span class="fa fa-caret-right"></span> 南航1613001班一队介绍</a></li>
                 <li ><a href="terms.jsp"><span class="fa fa-caret-right"></span> 南航1613001班一队条款</a></li>
             </ul></li>
 
@@ -161,14 +169,14 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
         </div>
         <div class="main-content">
         
-        <form method="POST" name="form1" id="form1" action="analysis.jsp">  
+         <form  method="post"  name="form1" id="form1">   
            <div class="form-group">
                 <label>选择算法</label>
                  <%
 			      if((String)request.getParameter("algorithm")!=null)
 			      {
 			         %>
-			         <select name="algorithm" id="algorithm" class="form-control" onchange="document.form1.submit();">
+			         <select name="algorithm" id="algorithm" class="form-control" onchange="analysis_submit()">
                     <option value="1" ${param.algorithm eq  '1' ? 'selected="selected"':''}>多元线性回归</option>
                     <option value="2" ${param.algorithm eq  '2' ? 'selected="selected"':''}">K_means</option>
                     <option value="3" ${param.algorithm eq  '3' ? 'selected="selected"':''}">NaiveBayes</option>                 
@@ -192,7 +200,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
             </div>
             <div class="form-group">
                 <label>选择已导入的数据</label>
-                <select name="imported_data" id="imported_data" class="form-control" onchange="document.form1.submit();">
+                <select name="imported_data" id="imported_data" class="form-control" onchange="analysis_submit()">
                 <%
                    sql="select * from analysis_data where username='"+session.getAttribute("username")+"'";
                    ResultSet st=SQLHelp.query(sql);
@@ -241,16 +249,16 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
                  %> </select>
                 
             </div>
-           
-             
-             
-             
+
 			<div class="btn-toolbar list-toolbar">
+			
 				<a class="btn btn-primary" href="#" style="display:inline-block; position:relative; overflow:hidden;">
-				    <input type="file"  accept=".xls,.xlsx" style="position:absolute; right:0; top:0; font-size:100px; opacity:0; filter:alpha(opacity=0);"/>
+				    <input type="file" name="file" accept=".xls,.xlsx"   onchange="upload_submit()"  style="position:absolute; right:0; top:0; font-size:100px; opacity:0; filter:alpha(opacity=0);"/>
 				<i class="fa fa-plus"></i> 加载数据</a>
+				 
+				
 			    <input type="button" class="btn btn-default" data-target=".set" data-toggle="collapse" value="参数设置"/>
- 
+                
 			      <%
 			      if((String)request.getParameter("algorithm")!=null)
 			      {
@@ -259,7 +267,10 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 				          %>
 				          <ul class="set nav nav-list collapse">    
 				          <br/> 
-				         <input type="submit" class="btn btn-default" value="开始"/>             
+				           <label>要预测的数据（数据之间请用英文逗号隔开）</label>
+				         <input type="text" name="predict_data" class="form-control" style="width:400px"/>
+				          <br/>
+				         <input type="button" class="btn btn-default" value="开始" onclick="R_submit()"/>             
 				        </ul>    
 				          <% 
 				      }
@@ -269,9 +280,9 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 					      <ul class="set nav nav-list collapse">    
 					         <br/>        
 					         <label>聚类簇数</label>
-					         <input type="text" class="form-control" style="width:100px"/>
+					         <input type="text" name="kind" class="form-control" style="width:100px"/>
 					          <br/> 
-					         <input type="submit" class="btn btn-default" value="开始"/>             
+					         <input type="button" class="btn btn-default" value="开始" onclick="R_submit()"/>             
 					      </ul>   
 					     <%
 				     }
@@ -281,7 +292,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 					      <ul class="set nav nav-list collapse">    
 					       
 					          <br/> 
-					         <input type="submit" class="btn btn-default" value="开始"/>             
+					         <input type="button" class="btn btn-default" value="开始" onclick="R_submit()"/>             
 					      </ul>   
 					     <%
 				     }
@@ -291,27 +302,28 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 					      <ul class="set nav nav-list collapse">      
 					          <br/> 
 					          <label>目标空间维数</label>
-					         <input type="text" class="form-control" style="width:100px"/>
+					         <input type="text" name="dimension" class="form-control" style="width:100px"/>
 					          <br/> 
-					         <input type="submit" class="btn btn-default" value="开始"/>             
+					         <input type="button" class="btn btn-default" value="开始" onclick="R_submit()"/>             
 					      </ul>   
 					     <%
 				     }
 			      }%>
 			</div>
-		   </form>
+         </form>  
+		
 		<%
 		if(input_table!=null)
 		{ %>
 		<label>部分测试数据:</label>
-		<input type="button" class="btn btn-primary pull-right" value="删除测试数据" onclick="window.location.herf='analysis.jsp?delete='<%=input_table%>"/>
+		<input type="button" class="btn btn-primary pull-right" value="删除测试数据" onclick="window.location.href='analysis.jsp?delete=<%=input_table%>&first=1'"/>
           <table class="table">
                 <thead>
                 <% 
                   sql="select  * from `"+input_table+"` limit 10 ";
                   st=SQLHelp.query(sql); %>
                    <tr>
-                  <%
+                  <%                 
                      for(i=0;i<=st.getMetaData().getColumnCount()&&i<=10;i++)
                      {
                         if(i==0)
@@ -323,6 +335,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
                          <th><%=i%></th>
                         <% }
                      }
+
                    %>
                 </tr>
                 </thead>
@@ -379,8 +392,8 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 
             <footer >
                 <hr >
-                <p class="pull-right"> <a  target="_blank">RPlato</a> 由 <a href="team-info.html" target="_blank">南航1613001班一队</a>设计</p>
-                <p>© 2015 <a href="team-info.html" target="_blank">南航1613001班一队</a></p>
+                <p class="pull-right"> <a  target="_blank">RPlato</a> 由 <a href="team-info.jsp" target="_blank">南航1613001班一队</a>设计</p>
+                <p>© 2015 <a href="team-info.jsp" target="_blank">南航1613001班一队</a></p>
             </footer>
         </div>
     </div>
@@ -396,10 +409,38 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
     <script type="text/javascript">
          window.onload=function()
          {
-           var first=<%=request.getParameter("first")%>;
+           var first=<%=request.getParameter("first")%>;  
+         
            if(first=="1")
-             document.getElementById('form1').submit();
+             analysis_submit();
+         
+            
          }
     </script>
-
+    <script>
+        function analysis_submit()
+        {
+           var form = document.forms['form1'];       
+			form.action ='analysis.jsp';
+			form.submit();
+        }
+    </script>
+    
+    <script>
+       function upload_submit()
+        {
+           var form = document.forms['form1'];
+            form.enctype='multipart/form-data';
+			form.action = 'servlet/Upload';
+			form.submit();
+        }
+    </script>
+    <script>
+       function R_submit()
+        {
+           var form = document.forms['form1'];
+			form.action = 'servlet/R_algorithm';
+			form.submit();
+        }
+    </script>
 </body></html>
